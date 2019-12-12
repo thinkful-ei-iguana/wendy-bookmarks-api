@@ -1,4 +1,4 @@
-INSERT INTO blogful_articles
+INSERT INTO bookmarks
   (title, url, description, rating)
 VALUES
   ('abs', 'http://abs.com', 'strong', 5),
