@@ -44,7 +44,7 @@ describe("Bookmarks endpoints", function() {
     });
 
     describe("GET /bookmarks/:bookmark_id", () => {
-      context("Given no bookmarks", () => {
+      context.skip("Given no bookmarks", () => {
         it("responds with 404", () => {
           const bookmarkId = 9999;
           return supertest(app)
@@ -69,7 +69,7 @@ describe("Bookmarks endpoints", function() {
       });
     });
   });
-  describe.only("POST /bookmarks", () => {
+  describe("POST /bookmarks", () => {
     it("creates a bookmark, responding with 201 and the new bookmark", () => {
       const newBookmark = {
         title: "test",
