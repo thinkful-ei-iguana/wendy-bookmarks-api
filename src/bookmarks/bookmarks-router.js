@@ -17,15 +17,18 @@ bookmarksRouter
   })
   .post(jsonParser, (req, res, next) => {
     const { title, url, rating, description } = req.body;
-    const newBookmark = { title, url, rating, description };
+    const newBookmark = { title, url, rating };
 
     for (const [key, value] of Object.entries(newBookmark)) {
-      if (value == null) {
+      if (!value) {
         return res.status(400).json({
           error: { message: `Missing '${key}' in request body` }
         });
       }
     }
+
+    newBookmark.description = description;
+
     BookmarksService.insertBookmark(req.app.get("db"), newBookmark)
       .then(bookmark => {
         res
@@ -59,7 +62,7 @@ bookmarksRouter
   })
   .delete((req, res, next) => {
     BookmarksService.deleteBookmark(req.app.get("db"), req.params.bookmark_id)
-      .then(() => {
+      .then(numRowsAffected => {
         res.status(204).end();
       })
       .catch(next);

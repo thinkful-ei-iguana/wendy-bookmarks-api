@@ -11,3 +11,6 @@
 {"message":"insert into \"bookmarks\" (\"description\", \"rating\", \"title\", \"url\") values ($1, DEFAULT, $2, $3) returning * - null value in column \"rating\" violates not-null constraint","level":"error"}
 {"message":"insert into \"bookmarks\" (\"description\", \"rating\", \"title\", \"url\") values ($1, $2, $3, DEFAULT) returning * - null value in column \"url\" violates not-null constraint","level":"error"}
 {"message":"insert into \"bookmarks\" (\"description\", \"rating\", \"title\", \"url\") values ($1, DEFAULT, $2, $3) returning * - null value in column \"rating\" violates not-null constraint","level":"error"}
+{"message":"Unexpected token } in JSON at position 61","level":"error"}
+{"message":"select * from \"bookmarks\" where \"id\" = $1 limit $2 - invalid input syntax for integer: \"bookmarkId\"","level":"error"}
+{"message":"select * from \"bookmarks\" where \"id\" = $1 limit $2 - invalid input syntax for integer: \"bookmarkId\"","level":"error"}

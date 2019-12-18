@@ -5,7 +5,7 @@ const { makeBookmarksArray } = require("./bookmarks.fixtures");
 
 describe("Bookmarks endpoints", function() {
   let db;
-
+  this.timeout(5000);
   before("make knex instance", () => {
     db = knex({
       client: "pg",
@@ -44,7 +44,7 @@ describe("Bookmarks endpoints", function() {
     });
 
     describe("GET /bookmarks/:bookmark_id", () => {
-      context.skip("Given no bookmarks", () => {
+      context("Given no bookmarks", () => {
         it("responds with 404", () => {
           const bookmarkId = 9999;
           return supertest(app)
@@ -135,8 +135,8 @@ describe("Bookmarks endpoints", function() {
       });
     });
   });
-  describe.only("DELETE /bookmarks/:bookmark_id", () => {
-    context("Given there are articles in the database", () => {
+  describe("DELETE /bookmarks/:bookmark_id", () => {
+    context("Given there are bookmarks in the database", () => {
       const testBookmarks = makeBookmarksArray();
 
       beforeEach("insert bookmarks", () => {
@@ -157,7 +157,7 @@ describe("Bookmarks endpoints", function() {
           );
       });
     });
-    context("Given no articles", () => {
+    context("Given no bookmarks", () => {
       it("responds with 404", () => {
         const bookmarkId = 99999;
         return supertest(app)
