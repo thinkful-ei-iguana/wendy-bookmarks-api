@@ -5,7 +5,7 @@ const { makeBookmarksArray } = require("./bookmarks.fixtures");
 
 describe("Bookmarks endpoints", function() {
   let db;
-  this.timeout(5000);
+
   before("make knex instance", () => {
     db = knex({
       client: "pg",
@@ -48,7 +48,7 @@ describe("Bookmarks endpoints", function() {
         it("responds with 404", () => {
           const bookmarkId = 9999;
           return supertest(app)
-            .get("/bookmarks/bookmarkId")
+            .get(`/bookmarks/${bookmarkId}`)
             .expect(404, { error: { message: "Bookmark doesn't exist" } });
         });
       });
@@ -142,7 +142,7 @@ describe("Bookmarks endpoints", function() {
       beforeEach("insert bookmarks", () => {
         return db.into("bookmarks").insert(testBookmarks);
       });
-      it("responds with 204 and removes the article", () => {
+      it("responds with 204 and removes the bookmark", () => {
         const idToRemove = 2;
         const expectedBookmarks = testBookmarks.filter(
           bookmark => bookmark.id !== idToRemove
@@ -152,7 +152,7 @@ describe("Bookmarks endpoints", function() {
           .expect(204)
           .then(res =>
             supertest(app)
-              .get(`/bookmarks`)
+              .get("/bookmarks")
               .expect(expectedBookmarks)
           );
       });
@@ -161,8 +161,8 @@ describe("Bookmarks endpoints", function() {
       it("responds with 404", () => {
         const bookmarkId = 99999;
         return supertest(app)
-          .delete(`bookmarks/${bookmarkId}`)
-          .expect(404, { error: { message: "Article doesn't exist" } });
+          .delete(`/bookmarks/${bookmarkId}`)
+          .expect(404, { error: { message: "Bookmark doesn't exist" } });
       });
     });
   });

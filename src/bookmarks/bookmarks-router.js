@@ -5,13 +5,21 @@ const BookmarksService = require("./bookmarks-service");
 const bookmarksRouter = express.Router();
 const jsonParser = express.json();
 
+const serializeBookmark = bookmark => ({
+  id: bookmark.id,
+  title: xss(bookmark.title),
+  url: bookmark.url,
+  rating: bookmark.rating,
+  description: xss(bookmark.description)
+});
+
 bookmarksRouter
   .route("/")
   .get((req, res, next) => {
     const knexInstance = req.app.get("db");
     BookmarksService.getAllBookmarks(knexInstance)
       .then(bookmarks => {
-        res.json(bookmarks);
+        res.json(bookmarks.map(serializeBookmark));
       })
       .catch(next);
   })
@@ -34,35 +42,32 @@ bookmarksRouter
         res
           .status(201)
           .location(`/bookmarks/${bookmark.id}`)
-          .json(bookmark);
+          .json(serializeBookmark(bookmark));
       })
       .catch(next);
   });
 
 bookmarksRouter
   .route("/:bookmark_id")
-  .get((req, res, next) => {
-    const knexInstance = req.app.get("db");
-    BookmarksService.getById(knexInstance, req.params.bookmark_id)
+  .all((req, res, next) => {
+    BookmarksService.getById(req.app.get("db"), req.params.bookmark_id)
       .then(bookmark => {
         if (!bookmark) {
-          return res
-            .status(404)
-            .json({ error: { message: "Bookmark doesn't exist" } });
+          return res.status(404).json({
+            error: { message: "Bookmark doesn't exist" }
+          });
         }
-        res.json({
-          id: bookmark.id,
-          title: xss(bookmark.title),
-          url: bookmark.url,
-          rating: bookmark.rating,
-          description: xss(bookmark.description)
-        });
+        res.bookmark = bookmark;
+        next();
       })
       .catch(next);
   })
+  .get((req, res, next) => {
+    res.json(serializeBookmark(res.bookmark));
+  })
   .delete((req, res, next) => {
     BookmarksService.deleteBookmark(req.app.get("db"), req.params.bookmark_id)
-      .then(numRowsAffected => {
+      .then(() => {
         res.status(204).end();
       })
       .catch(next);

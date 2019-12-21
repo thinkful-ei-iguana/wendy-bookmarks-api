@@ -14,3 +14,12 @@
 {"message":"Unexpected token } in JSON at position 61","level":"error"}
 {"message":"select * from \"bookmarks\" where \"id\" = $1 limit $2 - invalid input syntax for integer: \"bookmarkId\"","level":"error"}
 {"message":"select * from \"bookmarks\" where \"id\" = $1 limit $2 - invalid input syntax for integer: \"bookmarkId\"","level":"error"}
+{"message":"select * from \"bookmarks\" where \"id\" = $1 limit $2 - invalid input syntax for integer: \"bookmarkId\"","level":"error"}
+{"message":"select * from \"bookmarks\" where \"id\" = $1 limit $2 - invalid input syntax for integer: \"bookmarkId\"","level":"error"}
+{"message":"select * from \"bookmarks\" where \"id\" = $1 limit $2 - invalid input syntax for integer: \"bookmarkId\"","level":"error"}
+{"message":"select * from \"bookmarks\" where \"id\" = $1 limit $2 - invalid input syntax for integer: \"bookmarkId\"","level":"error"}
+{"message":"select * from \"bookmarks\" where \"id\" = $1 limit $2 - invalid input syntax for integer: \"bookmarkId\"","level":"error"}
+{"message":"select * from \"bookmarks\" where \"id\" = $1 limit $2 - invalid input syntax for integer: \"bookmarkId\"","level":"error"}
+{"message":"select * from \"bookmarks\" where \"id\" = $1 limit $2 - invalid input syntax for integer: \"bookmarkId\"","level":"error"}
+{"message":"select * from \"bookmarks\" where \"id\" = $1 limit $2 - invalid input syntax for integer: \"bookmarkId\"","level":"error"}
+{"message":"select * from \"bookmarks\" where \"id\" = $1 limit $2 - invalid input syntax for integer: \"bookmarkId\"","level":"error"}
