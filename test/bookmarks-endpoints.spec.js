@@ -1,7 +1,7 @@
 const { expect } = require("chai");
 const knex = require("knex");
 const app = require("../src/app");
-const { makeBookmarksArray } = require("./bookmarks.fixtures");
+const { makeBookmarksArray } = require("./bookmarks-fixtures");
 
 describe("Bookmarks endpoints", function() {
   let db;
@@ -20,11 +20,11 @@ describe("Bookmarks endpoints", function() {
 
   afterEach("clean the table", () => db("bookmarks").truncate());
 
-  describe("GET /bookmarks", () => {
+  describe("GET /api/bookmarks", () => {
     context("Given no data in database", () => {
       it("responds with 200 and an empty list", () => {
         return supertest(app)
-          .get("/bookmarks")
+          .get("/api/bookmarks")
           .expect(200, []);
       });
     });
@@ -36,19 +36,19 @@ describe("Bookmarks endpoints", function() {
         return db.into("bookmarks").insert(testBookmarks);
       });
 
-      it("GET /bookmarks responds with 200 and all of the bookmarks", () => {
+      it("GET /api/bookmarks responds with 200 and all of the bookmarks", () => {
         return supertest(app)
-          .get("/bookmarks")
+          .get("/api/bookmarks")
           .expect(200, testBookmarks);
       });
     });
 
-    describe("GET /bookmarks/:bookmark_id", () => {
+    describe("GET /api/bookmarks/:bookmark_id", () => {
       context("Given no bookmarks", () => {
         it("responds with 404", () => {
           const bookmarkId = 9999;
           return supertest(app)
-            .get(`/bookmarks/${bookmarkId}`)
+            .get(`/api/bookmarks/${bookmarkId}`)
             .expect(404, { error: { message: "Bookmark doesn't exist" } });
         });
       });
@@ -59,11 +59,11 @@ describe("Bookmarks endpoints", function() {
           return db.into("bookmarks").insert(testBookmarks);
         });
 
-        it("GET /bookmarks/:bookmarks_id responds with 200 and the specified bookmark", () => {
+        it("GET /api/bookmarks/:bookmarks_id responds with 200 and the specified bookmark", () => {
           const bookmarkId = 2;
           const expectedBookmark = testBookmarks[bookmarkId - 1];
           return supertest(app)
-            .get(`/bookmarks/${bookmarkId}`)
+            .get(`/api/bookmarks/${bookmarkId}`)
             .expect(200, expectedBookmark);
         });
       });
@@ -80,7 +80,7 @@ describe("Bookmarks endpoints", function() {
         });
         it("removes XSS attack content", () => {
           return supertest(app)
-            .get(`/bookmarks/${maliciousBookmark.id}`)
+            .get(`/api/bookmarks/${maliciousBookmark.id}`)
             .expect(200)
             .expect(res => {
               expect(res.body.title).to.eql(
@@ -94,17 +94,17 @@ describe("Bookmarks endpoints", function() {
       });
     });
   });
-  describe("POST /bookmarks", () => {
+  describe("POST /api/bookmarks", () => {
     it("creates a bookmark, responding with 201 and the new bookmark", function() {
       this.retries(3);
       const newBookmark = {
         title: "test",
         url: "http://example.com",
-        rating: "3",
+        rating: 3,
         description: "test"
       };
       return supertest(app)
-        .post("/bookmarks")
+        .post("/api/bookmarks")
         .send(newBookmark)
         .expect(201)
         .expect(res => {
@@ -113,7 +113,7 @@ describe("Bookmarks endpoints", function() {
           expect(res.body.rating).to.eql(newBookmark.rating);
           expect(res.body.description).to.eql(newBookmark.description);
           expect(res.body).to.have.property("id");
-          expect(res.headers.location).to.eql(`/bookmarks/${res.body.id}`);
+          expect(res.headers.location).to.eql(`/api/bookmarks/${res.body.id}`);
         });
     });
     const requiredFields = ["title", "url", "rating"];
@@ -127,7 +127,7 @@ describe("Bookmarks endpoints", function() {
       it(`responds with 400 and an error message when the '${field}' is missing`, () => {
         delete newBookmark[field];
         return supertest(app)
-          .post("/bookmarks")
+          .post("/api/bookmarks")
           .send(newBookmark)
           .expect(400, {
             error: { message: `Missing '${field}' in request body` }
@@ -135,7 +135,7 @@ describe("Bookmarks endpoints", function() {
       });
     });
   });
-  describe("DELETE /bookmarks/:bookmark_id", () => {
+  describe("DELETE /api/:bookmark_id", () => {
     context("Given there are bookmarks in the database", () => {
       const testBookmarks = makeBookmarksArray();
 
@@ -148,11 +148,11 @@ describe("Bookmarks endpoints", function() {
           bookmark => bookmark.id !== idToRemove
         );
         return supertest(app)
-          .delete(`/bookmarks/${idToRemove}`)
+          .delete(`/api/bookmarks/${idToRemove}`)
           .expect(204)
           .then(res =>
             supertest(app)
-              .get("/bookmarks")
+              .get("/api/bookmarks")
               .expect(expectedBookmarks)
           );
       });
@@ -161,8 +161,82 @@ describe("Bookmarks endpoints", function() {
       it("responds with 404", () => {
         const bookmarkId = 99999;
         return supertest(app)
-          .delete(`/bookmarks/${bookmarkId}`)
+          .delete(`/api/bookmarks/${bookmarkId}`)
           .expect(404, { error: { message: "Bookmark doesn't exist" } });
+      });
+    });
+  });
+  describe("PATCH /api/bookmarks/:bookmark_id", () => {
+    context("Given no bookmarks", () => {
+      it("responds with 404", () => {
+        const bookmarkId = 99999;
+        return supertest(app)
+          .patch(`/api/bookmarks/${bookmarkId}`)
+          .expect(404, { error: { message: "Bookmark doesn't exist" } });
+      });
+    });
+    context("Given there are bookmarks in the database", () => {
+      const testBookmarks = makeBookmarksArray();
+
+      beforeEach("insert bookmarks", () => {
+        return db("bookmarks").insert(testBookmarks);
+      });
+
+      it("responds with 204 and updates the bookmark", () => {
+        const idToUpdate = 2;
+        const updateBookmark = {
+          title: "new title",
+          url: "http://newurl.com",
+          rating: 4,
+          description: "test"
+        };
+        const expectedBookmark = {
+          ...testBookmarks[idToUpdate - 1],
+          ...updateBookmark
+        };
+        return supertest(app)
+          .patch(`/api/bookmarks/${idToUpdate}`)
+          .send(updateBookmark)
+          .expect(204)
+          .then(res => {
+            supertest(app)
+              .get(`/api/bookmarks/${idToUpdate}`)
+              .expect(expectedBookmark);
+          });
+      });
+      it("responds with 400 when no required fields supplied", () => {
+        const idToUpdate = 2;
+        return supertest(app)
+          .patch(`/api/bookmarks/${idToUpdate}`)
+          .send({ irrelevantField: "foo" })
+          .expect(400, {
+            error: {
+              message:
+                "Request body must contain either 'title', 'url', 'description' or 'rating'"
+            }
+          });
+      });
+      it("responds with 204 when updating only a subset of fields", () => {
+        const idToUpdate = 2;
+        const updateBookmark = {
+          title: "updated bookmark title"
+        };
+        const expectedBookmark = {
+          ...testBookmarks[idToUpdate - 1],
+          ...updateBookmark
+        };
+        return supertest(app)
+          .patch(`/api/bookmarks/${idToUpdate}`)
+          .send({
+            ...updateBookmark,
+            fieldToIgnore: "should not be in GET response"
+          })
+          .expect(204)
+          .then(res =>
+            supertest(app)
+              .get(`/api/bookmarks/${idToUpdate}`)
+              .expect(expectedBookmark)
+          );
       });
     });
   });
